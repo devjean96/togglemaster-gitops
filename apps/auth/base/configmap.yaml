@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: togglemaster
+data:
+  PORT: "8001"
+  ENVIRONMENT: base
+

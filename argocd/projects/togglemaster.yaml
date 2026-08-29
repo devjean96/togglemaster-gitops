@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: togglemaster
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: ToggleMaster applications managed exclusively from Git
+  sourceRepos:
+    - https://github.com/devjean96/togglemaster-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: togglemaster-homolog
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true

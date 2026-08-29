@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  labels:
+    app.kubernetes.io/name: analytics-service
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: togglemaster
+spec:
+  revisionHistoryLimit: 5
+  minReadySeconds: 10
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: analytics-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: analytics-service
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: togglemaster
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: analytics-service
+          image: togglemaster-analytics-service:sha-0000000
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8005
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: analytics-service-config
+          env:
+            - name: AWS_SQS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-service-secret
+                  key: AWS_SQS_URL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3

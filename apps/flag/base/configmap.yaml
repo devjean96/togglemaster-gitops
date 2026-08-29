@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flag-service-config
+  labels:
+    app.kubernetes.io/name: flag-service
+    app.kubernetes.io/part-of: togglemaster
+data:
+  PORT: "8002"
+  ENVIRONMENT: base
+  AUTH_SERVICE_URL: http://auth-service:8001
+

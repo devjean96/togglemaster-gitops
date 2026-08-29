@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytics-service-config
+  labels:
+    app.kubernetes.io/name: analytics-service
+    app.kubernetes.io/part-of: togglemaster
+data:
+  PORT: "8005"
+  ENVIRONMENT: base
+  AWS_REGION: us-east-1
+  AWS_DYNAMODB_TABLE: ToggleMasterAnalytics
+

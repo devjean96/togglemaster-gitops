@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flag-service
+  labels:
+    app.kubernetes.io/name: flag-service
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: togglemaster
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 10
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: flag-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: flag-service
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: togglemaster
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: flag-service
+          image: togglemaster-flag-service:sha-0000000
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8002
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: flag-service-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: flag-service-secret
+                  key: DATABASE_URL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+

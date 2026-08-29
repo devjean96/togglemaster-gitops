@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluation-service
+  labels:
+    app.kubernetes.io/name: evaluation-service
+    app.kubernetes.io/part-of: togglemaster
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: evaluation-service
+  ports:
+    - name: http
+      port: 8004
+      targetPort: http
+      protocol: TCP
+
