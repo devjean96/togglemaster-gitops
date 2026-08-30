@@ -9,7 +9,7 @@ labels:
     includeSelectors: true
 images:
   - name: togglemaster-analytics-service
-    newName: 000000000000.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/analytics-service
+    newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/analytics-service
     newTag: sha-0000000
 patches:
   - target:
@@ -22,6 +22,9 @@ patches:
       - op: replace
         path: /data/AWS_DYNAMODB_TABLE
         value: ToggleMasterAnalytics-homolog
+      - op: replace
+        path: /data/AWS_SQS_URL
+        value: https://sqs.us-east-1.amazonaws.com/935091649608/togglemaster-homolog-evaluation-events
   - target:
       kind: HorizontalPodAutoscaler
       name: analytics-service

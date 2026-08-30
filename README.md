@@ -42,20 +42,24 @@ As bases foram migradas dos manifests existentes em `/Users/jeanmoreiraact/Docum
 
 Todos os workloads sao reconciliados no namespace `togglemaster-homolog`. Os Services usam nomes estaveis, portanto a descoberta interna continua usando enderecos como `http://auth-service:8001`.
 
-## Valores que devem ser substituidos
+## Valores do ambiente
 
-Antes do primeiro sync, substitua os placeholders em todos os overlays:
+Os overlays de homologacao usam os outputs provisionados pelo Terraform:
 
-- `000000000000`: ID da conta AWS Academy.
-- `sha-0000000`: SHA curto real da imagem publicada no ECR.
-- `REPLACE_WITH_HOMOLOG_REDIS_ENDPOINT`: output `redis_endpoint` do Terraform.
+- conta AWS Academy `935091649608` nos cinco repositorios ECR;
+- tabela DynamoDB `ToggleMasterAnalytics-homolog`;
+- Redis `master.togglemaster-homolog-redis.e30slj.use1.cache.amazonaws.com:6379`;
+- SQS `togglemaster-homolog-evaluation-events` em `us-east-1`.
+
+Somente `sha-0000000` permanece como valor inicial. A pipeline de cada servico
+o substitui pela tag imutavel da imagem publicada no ECR.
 
 Os nomes ECR ja correspondem ao repositorio de infraestrutura:
 
 ```yaml
 images:
   - name: togglemaster-auth-service
-    newName: 123456789012.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
+    newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
     newTag: sha-a1b2c3d
 ```
 
@@ -71,7 +75,10 @@ Os Secrets devem existir no namespace do ambiente antes de os Deployments ficare
 | flag | `flag-service-secret` | `DATABASE_URL` |
 | targeting | `targeting-service-secret` | `DATABASE_URL` |
 | evaluation | `evaluation-service-secret` | `SERVICE_API_KEY` |
-| analytics | `analytics-service-secret` | `AWS_SQS_URL` |
+
+`AWS_SQS_URL` pertence ao ConfigMap do analytics porque identifica uma fila e
+nao concede acesso a ela. As credenciais continuam vindo da cadeia padrao do SDK
+AWS e da LabRole dos nodes.
 
 Use External Secrets Operator, Sealed Secrets ou outro mecanismo declarativo aprovado para materializar esses objetos. Nao adicione um `Secret` com valores em texto, Base64 ou credenciais temporarias do AWS Academy ao Git. Os valores encontrados nos manifests legados nao foram copiados e devem ser rotacionados se ja tiverem sido expostos ou commitados.
 

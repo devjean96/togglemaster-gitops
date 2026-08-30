@@ -9,7 +9,7 @@ labels:
     includeSelectors: true
 images:
   - name: togglemaster-evaluation-service
-    newName: 000000000000.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
+    newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
     newTag: sha-0000000
 patches:
   - target:
@@ -21,10 +21,10 @@ patches:
         value: homolog
       - op: replace
         path: /data/REDIS_URL
-        value: rediss://REPLACE_WITH_HOMOLOG_REDIS_ENDPOINT:6379
+        value: rediss://master.togglemaster-homolog-redis.e30slj.use1.cache.amazonaws.com:6379
       - op: replace
         path: /data/AWS_SQS_URL
-        value: https://sqs.us-east-1.amazonaws.com/000000000000/togglemaster-homolog-evaluation-events
+        value: https://sqs.us-east-1.amazonaws.com/935091649608/togglemaster-homolog-evaluation-events
   - target:
       kind: HorizontalPodAutoscaler
       name: evaluation-service

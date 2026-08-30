@@ -37,12 +37,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: analytics-service-config
-          env:
-            - name: AWS_SQS_URL
-              valueFrom:
-                secretKeyRef:
-                  name: analytics-service-secret
-                  key: AWS_SQS_URL
           resources:
             requests:
               cpu: 100m

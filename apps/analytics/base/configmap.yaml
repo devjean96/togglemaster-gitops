@@ -10,4 +10,4 @@ data:
   ENVIRONMENT: base
   AWS_REGION: us-east-1
   AWS_DYNAMODB_TABLE: ToggleMasterAnalytics
-
+  AWS_SQS_URL: https://sqs.us-east-1.amazonaws.com/ACCOUNT_ID/REPLACE_WITH_QUEUE
