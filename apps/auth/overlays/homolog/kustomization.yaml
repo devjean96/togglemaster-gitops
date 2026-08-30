@@ -9,8 +9,8 @@ labels:
     includeSelectors: true
 images:
   - name: togglemaster-auth-service
-    newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
-    newTag: sha-0000000
+    newName: /togglemaster-homolog/auth-service
+    newTag: sha-6559b8ccff61
 patches:
   - target:
       kind: ConfigMap
