@@ -26,7 +26,7 @@ togglemaster-gitops/
 └── README.md
 ```
 
-As bases foram migradas dos manifests existentes em `/Users/jeanmoreiraact/Documents/togglemaster/k8s` e conferidas contra as variaveis e endpoints implementados nos cinco servicos.
+As bases foram migradas dos manifests existentes em `/togglemaster/k8s` e conferidas contra as variaveis e endpoints implementados nos cinco servicos.
 
 ## O que cada aplicacao possui
 
