@@ -20,7 +20,6 @@ spec:
       selfHeal: true
       allowEmpty: false
     syncOptions:
-      - ServerSideApply=true
       - PruneLast=true
     retry:
       limit: 5
@@ -28,4 +27,3 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
-
