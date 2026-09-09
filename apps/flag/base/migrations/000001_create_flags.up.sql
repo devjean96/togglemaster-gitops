@@ -1,0 +1,27 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS flags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    is_enabled BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION set_flags_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS flags_set_updated_at ON flags;
+
+CREATE TRIGGER flags_set_updated_at
+BEFORE UPDATE ON flags
+FOR EACH ROW
+EXECUTE FUNCTION set_flags_updated_at();
+
+COMMIT;
