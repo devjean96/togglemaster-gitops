@@ -10,7 +10,7 @@ labels:
 images:
   - name: togglemaster-evaluation-service
     newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
-    newTag: sha-0000000
+    newTag: sha-befedf4266a0
 patches:
   - target:
       kind: ConfigMap
