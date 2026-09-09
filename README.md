@@ -37,6 +37,8 @@ As bases foram migradas dos manifests existentes em `/togglemaster/k8s` e confer
 - `readinessProbe` e `livenessProbe` no endpoint `/health`.
 - CPU e memoria em `requests` e `limits`.
 - Imagem ECR com tag imutavel no formato `sha-<commit>`; `latest` nao e usado.
+- Job `PreSync` de migration para os servicos PostgreSQL, executado antes do
+  respectivo Deployment.
 - Um overlay Kustomize `homolog`, usado como ambiente unico para reduzir consumo no AWS Academy.
 - HPA para `evaluation` e `analytics`, preservado dos manifests originais.
 
@@ -83,6 +85,40 @@ AWS e da LabRole dos nodes.
 Use External Secrets Operator, Sealed Secrets ou outro mecanismo declarativo aprovado para materializar esses objetos. Nao adicione um `Secret` com valores em texto, Base64 ou credenciais temporarias do AWS Academy ao Git. Os valores encontrados nos manifests legados nao foram copiados e devem ser rotacionados se ja tiverem sido expostos ou commitados.
 
 Os SDKs AWS de `evaluation` e `analytics` usam a cadeia padrao de credenciais e, no AWS Academy, herdam as permissoes disponiveis aos nodes pela LabRole. Credenciais AWS temporarias nao sao armazenadas nos Pods.
+
+## Migrations PostgreSQL
+
+`auth`, `flag` e `targeting` possuem migrations SQL versionadas nos diretorios
+`apps/<aplicacao>/base/migrations`. O padrao de nomes e o esperado pelo
+`golang-migrate`:
+
+```text
+000001_descricao.up.sql
+000001_descricao.down.sql
+000002_proxima_alteracao.up.sql
+000002_proxima_alteracao.down.sql
+```
+
+Durante a sincronizacao, o ArgoCD cria o ConfigMap de migrations na onda `-2` e
+executa o Job na onda `-1`, antes dos recursos normais. O Job recebe somente o
+`DATABASE_URL` do Secret correspondente e executa `migrate up`. A tabela
+`schema_migrations`, mantida pela ferramenta, registra a versao aplicada e evita
+executar a mesma migration novamente.
+
+O hook usa `BeforeHookCreation` para substituir execucoes antigas e
+`HookSucceeded` para apagar Jobs concluidos. Se uma migration falhar, o PreSync
+falha e impede a atualizacao do Deployment. Consulte o Job antes de alterar a
+versao manualmente:
+
+```bash
+kubectl -n togglemaster-homolog get jobs
+kubectl -n togglemaster-homolog logs job/auth-db-migrate
+```
+
+Arquivos `down.sql` documentam o rollback, mas nao sao executados
+automaticamente pelo ArgoCD, pois rollback destrutivo de schema exige decisao
+operacional explicita. Nunca edite uma migration que ja foi aplicada; crie a
+proxima versao.
 
 ## Validacao local
 
