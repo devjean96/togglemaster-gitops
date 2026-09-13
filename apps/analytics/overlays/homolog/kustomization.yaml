@@ -10,7 +10,7 @@ labels:
 images:
   - name: togglemaster-analytics-service
     newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/analytics-service
-    newTag: sha-0000000
+    newTag: sha-3a3d2d104c69
 patches:
   - target:
       kind: ConfigMap
