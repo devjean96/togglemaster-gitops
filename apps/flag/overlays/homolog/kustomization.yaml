@@ -10,7 +10,7 @@ labels:
 images:
   - name: togglemaster-flag-service
     newName: 935091649608.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/flag-service
-    newTag: sha-0000000
+    newTag: sha-44cd0d0ded3e
 patches:
   - target:
       kind: ConfigMap
