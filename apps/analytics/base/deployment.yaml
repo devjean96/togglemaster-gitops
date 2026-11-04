@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/name: analytics-service
     app.kubernetes.io/component: worker
     app.kubernetes.io/part-of: togglemaster
+    app.kubernetes.io/version: sha-0000000
 spec:
   revisionHistoryLimit: 5
   minReadySeconds: 10
@@ -24,6 +25,7 @@ spec:
         app.kubernetes.io/name: analytics-service
         app.kubernetes.io/component: worker
         app.kubernetes.io/part-of: togglemaster
+        app.kubernetes.io/version: sha-0000000
     spec:
       terminationGracePeriodSeconds: 30
       containers:
@@ -37,6 +39,18 @@ spec:
           envFrom:
             - configMapRef:
                 name: analytics-service-config
+          env:
+            - name: DEPLOYMENT_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: analytics-service-config
+                  key: ENVIRONMENT
+            - name: SERVICE_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=togglemaster,deployment.environment.name=$(DEPLOYMENT_ENVIRONMENT),service.version=$(SERVICE_VERSION)
           resources:
             requests:
               cpu: 100m

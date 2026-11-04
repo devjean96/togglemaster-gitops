@@ -37,6 +37,10 @@ As bases foram migradas dos manifests existentes em `/togglemaster/k8s` e confer
 - `readinessProbe` e `livenessProbe` no endpoint `/health`.
 - CPU e memoria em `requests` e `limits`.
 - Imagem ECR com tag imutavel no formato `sha-<commit>`; `latest` nao e usado.
+- Configuracao OpenTelemetry apontando para o Collector interno, com traces e
+  metricas OTLP destinados ao New Relic APM e logs OTLP desativados.
+- `service.version` derivado do mesmo label `app.kubernetes.io/version` que a
+  pipeline atualiza com a tag imutavel da imagem.
 - Job `PreSync` de migration para os servicos PostgreSQL, executado antes do
   respectivo Deployment.
 - Um overlay Kustomize `homolog`, usado como ambiente unico para reduzir consumo no AWS Academy.
@@ -65,7 +69,28 @@ images:
     newTag: sha-a1b2c3d
 ```
 
-O pipeline de cada servico publica a imagem com uma tag `sha-<commit>` e atualiza o overlay `homolog`. Este e o unico destino de deploy do desafio; nao existe promocao para outro ambiente.
+O pipeline de cada servico publica a imagem com uma tag `sha-<commit>` e atualiza
+no overlay `homolog` tanto `images[].newTag` quanto
+`app.kubernetes.io/version`. Assim, o atributo OpenTelemetry `service.version`
+sempre identifica exatamente a imagem em execucao. Este e o unico destino de
+deploy do desafio; nao existe promocao para outro ambiente.
+
+## OpenTelemetry
+
+Os cinco ConfigMaps definem o endpoint interno do Collector, protocolo
+`http/protobuf`, propagadores W3C, sampling e exportadores. Cada Deployment usa
+a Downward API para ler `app.kubernetes.io/version` e monta:
+
+```text
+service.namespace=togglemaster,
+deployment.environment.name=homolog,
+service.version=sha-<commit>
+```
+
+O endpoint OTLP compartilhado e
+`http://opentelemetry-collector.observability.svc.cluster.local:4318`. A license
+key do New Relic pertence somente ao Collector e nao aparece neste repositorio.
+Prometheus, Loki e Grafana permanecem fora do escopo destes manifests.
 
 ## Contrato de Secrets
 

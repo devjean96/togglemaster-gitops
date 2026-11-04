@@ -11,3 +11,12 @@ data:
   AWS_REGION: us-east-1
   AWS_DYNAMODB_TABLE: ToggleMasterAnalytics
   AWS_SQS_URL: https://sqs.us-east-1.amazonaws.com/ACCOUNT_ID/REPLACE_WITH_QUEUE
+  OTEL_SERVICE_NAME: analytics-service
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetry-collector.observability.svc.cluster.local:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: none
+  OTEL_PROPAGATORS: tracecontext,baggage
+  OTEL_TRACES_SAMPLER: parentbased_traceidratio
+  OTEL_TRACES_SAMPLER_ARG: "1.0"
