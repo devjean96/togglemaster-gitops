@@ -25,7 +25,7 @@ patches:
         value: homolog
       - op: replace
         path: /data/REDIS_URL
-        value: rediss://master.togglemaster-homolog-redis.e30slj.use1.cache.amazonaws.com:6379
+        value: rediss://master.togglemaster-homolog-redis.mjdgbj.use1.cache.amazonaws.com:6379
       - op: replace
         path: /data/AWS_SQS_URL
         value: https://sqs.us-east-1.amazonaws.com/434271199872/togglemaster-homolog-evaluation-events
