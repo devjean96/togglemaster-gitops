@@ -8,13 +8,13 @@ labels:
       app.kubernetes.io/environment: homolog
     includeSelectors: true
   - pairs:
-      app.kubernetes.io/version: sha-1a77b24bde80
+      app.kubernetes.io/version: sha-ef0973c608dc
     includeSelectors: false
     includeTemplates: true
 images:
   - name: togglemaster-auth-service
     newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
-    newTag: sha-1a77b24bde80
+    newTag: sha-ef0973c608dc
 patches:
   - target:
       kind: ConfigMap
