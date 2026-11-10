@@ -8,13 +8,13 @@ labels:
       app.kubernetes.io/environment: homolog
     includeSelectors: true
   - pairs:
-      app.kubernetes.io/version: sha-0000000
+      app.kubernetes.io/version: sha-9f58c5d83c11
     includeSelectors: false
     includeTemplates: true
 images:
   - name: togglemaster-evaluation-service
     newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
-    newTag: sha-22f0553e1c80
+    newTag: sha-9f58c5d83c11
 patches:
   - target:
       kind: ConfigMap
@@ -25,10 +25,10 @@ patches:
         value: homolog
       - op: replace
         path: /data/REDIS_URL
-        value: rediss://master.togglemaster-homolog-redis.mjdgbj.use1.cache.amazonaws.com:6379
+        value: rediss://master.togglemaster-homolog-redis.e30slj.use1.cache.amazonaws.com:6379
       - op: replace
         path: /data/AWS_SQS_URL
-        value: https://sqs.us-east-1.amazonaws.com/434271199872/togglemaster-homolog-evaluation-events
+        value: https://sqs.us-east-1.amazonaws.com/935091649608/togglemaster-homolog-evaluation-events
   - target:
       kind: HorizontalPodAutoscaler
       name: evaluation-service
