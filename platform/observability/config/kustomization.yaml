@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Sem "namespace:" global: a Role/RoleBinding do self-healer ficam em
+# togglemaster-homolog; o restante em observability.
+resources:
+  - self-healer/rbac.yaml
+  - self-healer/deployment.yaml
+
+configMapGenerator:
+  # Codigo do self-healer (o hash no nome forca rollout quando o codigo muda).
+  - name: self-healer-code
+    namespace: observability
+    files:
+      - self-healer/healer.py
+
+  # Dashboard lido pelo sidecar do Grafana (label grafana_dashboard=1).
+  - name: grafana-dashboard-togglemaster
+    namespace: observability
+    files:
+      - dashboards/togglemaster-overview.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: ToggleMaster
+
+  # Alerting provisionado pelo sidecar do Grafana (label grafana_alert=1).
+  - name: grafana-alerting-togglemaster
+    namespace: observability
+    files:
+      - alerting/rules.yaml
+      - alerting/contactpoints.yaml
+      - alerting/policies.yaml
+      - alerting/templates.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_alert: "1"

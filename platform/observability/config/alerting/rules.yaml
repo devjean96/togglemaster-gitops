@@ -1,0 +1,66 @@
+# Regra de alerta do Grafana (provisionada pelo sidecar).
+# IMPORTANTE: arquivos de provisionamento expandem $VAR; por isso os templates
+# abaixo usam .Labels/.Values (sem "$").
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: togglemaster-slo
+    folder: ToggleMaster
+    interval: 30s
+    rules:
+      - uid: togglemaster-http-5xx
+        title: Taxa de erros HTTP 5xx acima de 5%
+        condition: C
+        data:
+          # A: % de requisicoes com erro (5xx) por servico, nos ultimos 2 minutos.
+          #    So considera servicos com trafego (> 0.1 req/s) para evitar falso
+          #    positivo com 1 erro isolado (alert fatigue).
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              range: false
+              expr: >-
+                (
+                  100 * sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", status_code="STATUS_CODE_ERROR"}[2m]))
+                  / sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}[2m]))
+                )
+                and on (service_name)
+                (sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}[2m])) > 0.1)
+          # C: dispara quando A > 5 (%)
+          - refId: C
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource:
+                type: __expr__
+                uid: __expr__
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [5]
+        for: 1m
+        noDataState: OK
+        execErrState: Error
+        labels:
+          severity: critical
+          team: togglemaster
+          remediation: rollout-restart
+        annotations:
+          summary: '{{ index .Labels "service_name" }} com {{ printf "%.1f" .Values.A.Value }}% de erros 5xx (limite 5%)'
+          description: >-
+            O servico {{ index .Labels "service_name" }} esta respondendo com erro em
+            {{ printf "%.1f" .Values.A.Value }}% das requisicoes nos ultimos 2 minutos.
+            Acao automatica: o self-healer executa rollout restart do deployment.
+          runbook_url: https://github.com/devjean96/togglemaster-gitops/blob/main/docs/runbook-http-5xx.md
+        dashboardUid: togglemaster-overview
+        panelId: 15

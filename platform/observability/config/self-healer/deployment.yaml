@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: self-healer
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: self-healer
+    app.kubernetes.io/component: runbook-automation
+    app.kubernetes.io/part-of: togglemaster-observability
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: self-healer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: self-healer
+        app.kubernetes.io/component: runbook-automation
+        app.kubernetes.io/part-of: togglemaster-observability
+    spec:
+      serviceAccountName: self-healer
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: self-healer
+          image: python:3.13-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-u", "/app/healer.py"]
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: TARGET_NAMESPACE
+              value: togglemaster-homolog
+            - name: ALLOWED_DEPLOYMENTS
+              value: auth-service,flag-service,targeting-service,evaluation-service,analytics-service
+            - name: COOLDOWN_SECONDS
+              value: "300"
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: SELF_HEALER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: observability-alerting
+                  key: SELF_HEALER_TOKEN
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: observability-alerting
+                  key: DISCORD_WEBHOOK_URL
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: self-healer-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: self-healer
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: self-healer
+    app.kubernetes.io/part-of: togglemaster-observability
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: self-healer
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

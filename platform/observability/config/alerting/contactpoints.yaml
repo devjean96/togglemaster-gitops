@@ -1,0 +1,34 @@
+# Um contact point com tres integracoes: incidente (PagerDuty), ChatOps
+# (Discord) e automacao de self-healing (webhook interno).
+# Os valores ${...} vem do Secret "observability-alerting" (Terraform).
+apiVersion: 1
+contactPoints:
+  - orgId: 1
+    name: togglemaster-oncall
+    receivers:
+      - uid: togglemaster-pagerduty
+        type: pagerduty
+        disableResolveMessage: false
+        settings:
+          integrationKey: ${PAGERDUTY_INTEGRATION_KEY}
+          severity: critical
+          class: http-5xx
+          component: togglemaster
+          group: homolog
+          summary: '{{ template "togglemaster.title" . }}'
+      - uid: togglemaster-discord
+        type: discord
+        disableResolveMessage: false
+        settings:
+          url: ${DISCORD_WEBHOOK_URL}
+          title: '{{ template "togglemaster.title" . }}'
+          message: '{{ template "togglemaster.message" . }}'
+          use_discord_username: false
+      - uid: togglemaster-self-healer
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: http://self-healer.observability.svc.cluster.local:8080/hooks/grafana
+          httpMethod: POST
+          authorization_scheme: Bearer
+          authorization_credentials: ${SELF_HEALER_TOKEN}

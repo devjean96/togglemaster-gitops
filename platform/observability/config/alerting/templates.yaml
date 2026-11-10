@@ -1,0 +1,19 @@
+# Templates de notificacao (ChatOps). Sem "$" por causa da expansao de env.
+apiVersion: 1
+templates:
+  - orgId: 1
+    name: togglemaster
+    template: |
+      {{ define "togglemaster.title" }}{{ if eq .Status "firing" }}🔥 [FIRING]{{ else }}✅ [RESOLVED]{{ end }} {{ .CommonLabels.alertname }} — {{ .CommonLabels.service_name }}{{ end }}
+
+      {{ define "togglemaster.message" }}{{ range .Alerts }}
+      **Serviço:** `{{ .Labels.service_name }}`
+      **Severidade:** {{ .Labels.severity }} | **Ambiente:** homolog (EKS)
+      **Resumo:** {{ .Annotations.summary }}
+      **Detalhes:** {{ .Annotations.description }}
+      **Início:** {{ .StartsAt.Format "02/01/2006 15:04:05 MST" }}{{ if eq .Status "resolved" }}
+      **Resolvido:** {{ .EndsAt.Format "02/01/2006 15:04:05 MST" }}{{ end }}
+      **Self-healing:** `kubectl rollout restart deployment/{{ .Labels.service_name }}` ({{ .Labels.remediation }})
+      **Runbook:** {{ .Annotations.runbook_url }}
+      **Alerta:** {{ .GeneratorURL }}
+      {{ end }}{{ end }}

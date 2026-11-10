@@ -1,0 +1,70 @@
+# Grafana: visualizacao + alerting unificado.
+# Dashboards e regras de alerta chegam por ConfigMaps (app observability-config)
+# lidos pelos sidecars; os segredos chegam por Secrets criados pelo Terraform.
+
+admin:
+  existingSecret: grafana-admin          # criado pelo Terraform (modules/observability-secrets)
+  userKey: admin-user
+  passwordKey: admin-password
+
+# PAGERDUTY_INTEGRATION_KEY, DISCORD_WEBHOOK_URL e SELF_HEALER_TOKEN viram
+# variaveis de ambiente, usadas nos contact points como ${VAR}.
+envFromSecret: observability-alerting
+
+persistence:
+  enabled: false
+
+testFramework:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 192Mi
+  limits:
+    memory: 512Mi
+
+grafana.ini:
+  analytics:
+    check_for_updates: false
+    reporting_enabled: false
+  unified_alerting:
+    enabled: true
+  users:
+    default_theme: dark
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-server.observability.svc.cluster.local
+        isDefault: true
+        editable: false
+        jsonData:
+          timeInterval: 30s
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.observability.svc.cluster.local   # Loki instalado pelo Terraform (modules/loki)
+        editable: false
+        jsonData:
+          maxLines: 1000
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValue: "1"
+    folderAnnotation: grafana_folder
+    provider:
+      foldersFromFilesStructure: true
+  alerts:
+    enabled: true
+    label: grafana_alert
+    labelValue: "1"
+    initAlerts: true   # carrega as regras antes do Grafana subir

@@ -1,0 +1,49 @@
+# Prometheus: metricas de infraestrutura (scrape) + metricas RED que chegam do
+# OTel Collector gateway pelo receptor OTLP nativo.
+server:
+  extraFlags:
+    - web.enable-lifecycle
+    - web.enable-otlp-receiver   # aceita POST /api/v1/otlp/v1/metrics do OTel Collector
+  global:
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    evaluation_interval: 30s
+  tsdb:
+    out_of_order_time_window: 30m
+  retention: "2d"
+  # AWS Academy: sem PVC (dados em emptyDir). Suficiente para a demonstracao.
+  persistentVolume:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+# Os alertas ficam no Grafana (unified alerting), entao o Alertmanager nao e usado.
+alertmanager:
+  enabled: false
+
+prometheus-pushgateway:
+  enabled: false
+
+# Estado dos objetos K8s (pods, deployments, HPA, restarts).
+kube-state-metrics:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+# CPU/memoria dos nodes.
+prometheus-node-exporter:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
