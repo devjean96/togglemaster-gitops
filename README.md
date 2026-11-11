@@ -92,6 +92,16 @@ O endpoint OTLP compartilhado e
 key do New Relic pertence somente ao Collector e nao aparece neste repositorio.
 Prometheus, Loki e Grafana permanecem fora do escopo destes manifests.
 
+## Contact points do Grafana
+
+O chart local `platform/observability/contactpoints` sempre provisiona o
+receiver interno do self-healer. PagerDuty e Discord sao opcionais e ficam
+desabilitados por padrao. Para habilitar uma integracao, altere o respectivo
+`receivers.<nome>.enabled` na Application `grafana-contactpoints` e garanta que
+o Secret `observability-alerting`, criado pelo Terraform, contenha a credencial
+correspondente. Assim, uma credencial ausente nunca gera um receiver invalido
+durante a inicializacao do Grafana.
+
 ## Contrato de Secrets
 
 Os Secrets devem existir no namespace do ambiente antes de os Deployments ficarem saudaveis:
@@ -191,3 +201,21 @@ Enquanto Metrics Server ou ingress-nginx nao estiverem instalados, remova declar
 ## Recuperacao e rollback
 
 Para rollback, reverta o commit que alterou a tag ou configuracao e faça merge. O ArgoCD reconciliara o estado anterior. Evite usar rollback imperativo no cluster, pois o `selfHeal` restaurara o estado registrado no Git.
+
+## Observabilidade (Fase 4)
+
+Gerenciada pelo AppProject `observability` (`argocd/observability/`), no namespace `observability`:
+
+| Application | Chart (versão fixa) | Papel |
+|---|---|---|
+| `prometheus` | prometheus-community/prometheus 29.47.0 | Métricas do cluster (kube-state-metrics, node-exporter, cAdvisor) + receptor OTLP para as métricas RED dos serviços |
+| `grafana` | grafana-community/grafana 14.4.0 | Dashboards e alerting |
+| `observability-config` | `platform/observability/config` | Dashboard, regras/contact points de alerta e o self-healer |
+
+Fluxo: serviços → OTLP → OTel Collector (Terraform) → New Relic (APM) e
+Prometheus (spanmetrics). Logs: coletor de logs + Loki, ambos do Terraform. Segredos (PagerDuty, Discord, senha do Grafana)
+são criados pelo Terraform; aqui só existem as referências.
+
+Acesso local: `kubectl -n observability port-forward svc/grafana 3000:80` e
+`kubectl -n observability port-forward svc/prometheus-server 9090:80`.
+Demonstração do incidente: `scripts/gerar-trafego.yaml` e `scripts/demo-incidente.sh`.

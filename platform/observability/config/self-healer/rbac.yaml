@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: self-healer
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: self-healer
+    app.kubernetes.io/part-of: togglemaster-observability
+automountServiceAccountToken: true
+---
+# Privilegio minimo: so ler e "patchar" Deployments do namespace das apps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: self-healer-rollout-restart
+  namespace: togglemaster-homolog
+  labels:
+    app.kubernetes.io/name: self-healer
+    app.kubernetes.io/part-of: togglemaster-observability
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: self-healer-rollout-restart
+  namespace: togglemaster-homolog
+  labels:
+    app.kubernetes.io/name: self-healer
+    app.kubernetes.io/part-of: togglemaster-observability
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: self-healer-rollout-restart
+subjects:
+  - kind: ServiceAccount
+    name: self-healer
+    namespace: observability

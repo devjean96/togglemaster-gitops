@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: observability
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Stack de observabilidade do ToggleMaster via GitOps (Prometheus, Grafana, self-healer). Loki e OTel Collector vem do Terraform.
+  sourceRepos:
+    - https://github.com/devjean96/togglemaster-gitops.git
+    - https://prometheus-community.github.io/helm-charts
+    - https://grafana-community.github.io/helm-charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: observability
+    # O self-healer precisa de uma Role neste namespace para reiniciar Deployments.
+    - server: https://kubernetes.default.svc
+      namespace: togglemaster-homolog
+  # Charts de monitoramento criam ClusterRoles/Bindings (leitura do cluster).
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true

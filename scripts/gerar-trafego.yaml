@@ -1,0 +1,43 @@
+# Gerador de trafego para a demonstracao da Fase 4 (NAO e gerenciado pelo ArgoCD).
+#   kubectl apply -f scripts/gerar-trafego.yaml
+#   kubectl -n togglemaster-homolog logs -f pod/gerador-trafego
+#   kubectl -n togglemaster-homolog delete pod gerador-trafego
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gerador-trafego
+  namespace: togglemaster-homolog
+  labels:
+    app.kubernetes.io/name: gerador-trafego
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 100
+  containers:
+    - name: curl
+      image: curlimages/curl:8.17.0
+      env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: evaluation-service-secret
+              key: SERVICE_API_KEY
+        - name: FLAG_NAME
+          value: enable-new-dashboard
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          i=0
+          while true; do
+            i=$((i+1))
+            # trace distribuido: evaluation -> flag/targeting -> auth -> postgres
+            e=$(curl -s -o /dev/null -w '%{http_code}' "http://evaluation-service:8004/evaluate?user_id=user-$((i % 50))&flag_name=${FLAG_NAME}")
+            # chamada direta ao auth-service (alvo do alerta de 5xx)
+            a=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer ${API_KEY}" http://auth-service:8001/validate)
+            [ $((i % 20)) -eq 0 ] && echo "$(date +%T) req=$i evaluate=$e auth=$a"
+            sleep 0.2
+          done
+      resources:
+        requests: {cpu: 10m, memory: 16Mi}
+        limits: {memory: 32Mi}
