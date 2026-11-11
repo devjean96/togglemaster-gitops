@@ -20,7 +20,7 @@ spec:
       valuesObject:
         receivers:
           pagerduty:
-            enabled: false
+            enabled: true
           discord:
             enabled: false
   destination:
