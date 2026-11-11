@@ -4,3 +4,4 @@ resources:
   - prometheus.yaml
   - grafana.yaml
   - observability-config.yaml
+  - grafana-contactpoints.yaml

@@ -1,0 +1,5 @@
+receivers:
+  pagerduty:
+    enabled: false
+  discord:
+    enabled: false

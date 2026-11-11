@@ -1,0 +1,6 @@
+apiVersion: v2
+name: togglemaster-grafana-contactpoints
+description: Contact points condicionais do Grafana para o ToggleMaster
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

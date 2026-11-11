@@ -30,7 +30,6 @@ configMapGenerator:
     namespace: observability
     files:
       - alerting/rules.yaml
-      - alerting/contactpoints.yaml
       - alerting/policies.yaml
       - alerting/templates.yaml
     options:

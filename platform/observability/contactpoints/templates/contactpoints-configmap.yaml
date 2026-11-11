@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-contactpoints-togglemaster
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: grafana-contactpoints
+    app.kubernetes.io/part-of: togglemaster-observability
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    grafana_alert: "1"
+data:
+  contactpoints.yaml: |
+    apiVersion: 1
+    contactPoints:
+      - orgId: 1
+        name: togglemaster-oncall
+        receivers:
+{{ if .Values.receivers.pagerduty.enabled }}
+          - uid: togglemaster-pagerduty
+            type: pagerduty
+            disableResolveMessage: false
+            settings:
+              integrationKey: ${PAGERDUTY_INTEGRATION_KEY}
+              severity: critical
+              class: http-5xx
+              component: togglemaster
+              group: homolog
+              summary: {{ printf "{{ template \"togglemaster.title\" . }}" | quote }}
+{{ end }}
+{{ if .Values.receivers.discord.enabled }}
+          - uid: togglemaster-discord
+            type: discord
+            disableResolveMessage: false
+            settings:
+              url: ${DISCORD_WEBHOOK_URL}
+              title: {{ printf "{{ template \"togglemaster.title\" . }}" | quote }}
+              message: {{ printf "{{ template \"togglemaster.message\" . }}" | quote }}
+              use_discord_username: false
+{{ end }}
+          - uid: togglemaster-self-healer
+            type: webhook
+            disableResolveMessage: false
+            settings:
+              url: http://self-healer.observability.svc.cluster.local:8080/hooks/grafana
+              httpMethod: POST
+              authorization_scheme: Bearer
+              authorization_credentials: ${SELF_HEALER_TOKEN}

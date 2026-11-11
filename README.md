@@ -92,6 +92,16 @@ O endpoint OTLP compartilhado e
 key do New Relic pertence somente ao Collector e nao aparece neste repositorio.
 Prometheus, Loki e Grafana permanecem fora do escopo destes manifests.
 
+## Contact points do Grafana
+
+O chart local `platform/observability/contactpoints` sempre provisiona o
+receiver interno do self-healer. PagerDuty e Discord sao opcionais e ficam
+desabilitados por padrao. Para habilitar uma integracao, altere o respectivo
+`receivers.<nome>.enabled` na Application `grafana-contactpoints` e garanta que
+o Secret `observability-alerting`, criado pelo Terraform, contenha a credencial
+correspondente. Assim, uma credencial ausente nunca gera um receiver invalido
+durante a inicializacao do Grafana.
+
 ## Contrato de Secrets
 
 Os Secrets devem existir no namespace do ambiente antes de os Deployments ficarem saudaveis:
