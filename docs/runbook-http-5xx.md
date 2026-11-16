@@ -5,9 +5,34 @@
 
 ## O que significa
 Mais de 5% das requisições de um microsserviço terminaram com erro (span de
-servidor com status `ERROR`, ou seja HTTP 5xx) nos últimos 2 minutos, com tráfego
-acima de 0,1 req/s. Métrica: `traces_span_metrics_calls_total` (spanmetrics do
-OTel Collector), armazenada no Prometheus.
+servidor com código HTTP entre 500 e 599) nos últimos 2 minutos, com tráfego
+acima de 0,1 req/s. A regra consulta `http_response_status_code` e usa
+`http_status_code` como compatibilidade para instrumentações OpenTelemetry
+legadas. Métrica: `traces_span_metrics_calls_total` (spanmetrics do OTel
+Collector), armazenada no Prometheus.
+
+## Validação no Prometheus
+
+Depois de gerar uma resposta 5xx, abra o Prometheus com
+`kubectl -n observability port-forward svc/prometheus-server 9090:80` e consulte:
+
+```promql
+count by (service_name, http_response_status_code, http_status_code) (
+  traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}
+)
+```
+
+O serviço deve apresentar `http_response_status_code` entre `500` e `599`, ou
+`http_status_code` para uma instrumentação legada. Para validar exatamente o
+numerador usado pelo alerta:
+
+```promql
+sum by (service_name) (
+  rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", http_response_status_code=~"5[0-9]{2}"}[2m])
+  or
+  rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", http_response_status_code="", http_status_code=~"5[0-9]{2}"}[2m])
+)
+```
 
 ## Ação automática (self-healing)
 O Grafana chama o `self-healer` (namespace `observability`), que executa

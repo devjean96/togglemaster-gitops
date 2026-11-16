@@ -26,8 +26,12 @@ groups:
               range: false
               expr: >-
                 (
-                  100 * sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", status_code="STATUS_CODE_ERROR"}[2m]))
-                  / sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}[2m]))
+                  100 * sum by (service_name) (
+                    rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", http_response_status_code=~"5[0-9]{2}"}[2m])
+                    or
+                    rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER", http_response_status_code="", http_status_code=~"5[0-9]{2}"}[2m])
+                  )
+                  / clamp_min(sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}[2m])), 1e-9)
                 )
                 and on (service_name)
                 (sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind="SPAN_KIND_SERVER"}[2m])) > 0.1)

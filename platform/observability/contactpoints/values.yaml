@@ -2,4 +2,4 @@ receivers:
   pagerduty:
     enabled: true
   discord:
-    enabled: false
+    enabled: true

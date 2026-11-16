@@ -22,7 +22,7 @@ spec:
           pagerduty:
             enabled: true
           discord:
-            enabled: false
+            enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: observability

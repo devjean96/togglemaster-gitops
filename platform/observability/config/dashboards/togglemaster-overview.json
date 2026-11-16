@@ -227,7 +227,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "100 * sum(rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / clamp_min(sum(rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\"}[$__rate_interval])), 1e-9)",
+          "expr": "100 * sum(rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", http_response_status_code=~\"5[0-9]{2}\"}[$__rate_interval]) or rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", http_response_status_code=\"\", http_status_code=~\"5[0-9]{2}\"}[$__rate_interval])) / clamp_min(sum(rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\"}[$__rate_interval])), 1e-9)",
           "refId": "A",
           "legendFormat": ""
         }
@@ -803,7 +803,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "100 * sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\"}[$__rate_interval]))",
+          "expr": "100 * sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", http_response_status_code=~\"5[0-9]{2}\"}[$__rate_interval]) or rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\", http_response_status_code=\"\", http_status_code=~\"5[0-9]{2}\"}[$__rate_interval])) / clamp_min(sum by (service_name) (rate(traces_span_metrics_calls_total{span_kind=\"SPAN_KIND_SERVER\", service_name=~\"$service\"}[$__rate_interval])), 1e-9)",
           "refId": "A",
           "legendFormat": "{{service_name}}"
         }

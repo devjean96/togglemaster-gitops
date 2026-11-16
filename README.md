@@ -95,12 +95,15 @@ Prometheus, Loki e Grafana permanecem fora do escopo destes manifests.
 ## Contact points do Grafana
 
 O chart local `platform/observability/contactpoints` sempre provisiona o
-receiver interno do self-healer. PagerDuty e Discord sao opcionais e ficam
-desabilitados por padrao. Para habilitar uma integracao, altere o respectivo
-`receivers.<nome>.enabled` na Application `grafana-contactpoints` e garanta que
-o Secret `observability-alerting`, criado pelo Terraform, contenha a credencial
-correspondente. Assim, uma credencial ausente nunca gera um receiver invalido
-durante a inicializacao do Grafana.
+receiver interno do self-healer. Em homologacao, PagerDuty e Discord ficam
+habilitados na Application `grafana-contactpoints`. O Secret
+`observability-alerting`, criado pelo Terraform, deve conter
+`PAGERDUTY_INTEGRATION_KEY` e `DISCORD_WEBHOOK_URL`; no GitHub Actions da
+infraestrutura, os valores vêm dos secrets `HOMOLOG_PAGERDUTY_INTEGRATION_KEY`
+e `HOMOLOG_DISCORD_WEBHOOK_URL`. Nenhuma dessas credenciais deve ser commitada.
+Se o Secret for criado ou rotacionado com o Grafana já em execução, recarregue
+as variáveis de ambiente com
+`kubectl -n observability rollout restart deployment/grafana`.
 
 ## Contrato de Secrets
 
@@ -108,10 +111,14 @@ Os Secrets devem existir no namespace do ambiente antes de os Deployments ficare
 
 | Aplicacao | Secret | Chaves obrigatorias |
 | --- | --- | --- |
-| auth | `auth-service-secret` | `DATABASE_URL`, `MASTER_KEY` |
+| auth | `auth-service-secret` | `DATABASE_URL`, `MASTER_KEY`, `EVALUATION_SERVICE_API_KEY` |
 | flag | `flag-service-secret` | `DATABASE_URL` |
 | targeting | `targeting-service-secret` | `DATABASE_URL` |
 | evaluation | `evaluation-service-secret` | `SERVICE_API_KEY` |
+
+`EVALUATION_SERVICE_API_KEY` e `SERVICE_API_KEY` recebem o mesmo valor do
+Terraform. Após uma rotação, reinicie `auth-service` e `evaluation-service`
+para que ambos recarreguem a chave e o auth execute novamente o bootstrap.
 
 `AWS_SQS_URL` pertence ao ConfigMap do analytics porque identifica uma fila e
 nao concede acesso a ela. As credenciais continuam vindo da cadeia padrao do SDK
@@ -213,7 +220,7 @@ Gerenciada pelo AppProject `observability` (`argocd/observability/`), no namespa
 | `observability-config` | `platform/observability/config` | Dashboard, regras/contact points de alerta e o self-healer |
 
 Fluxo: serviços → OTLP → OTel Collector (Terraform) → New Relic (APM) e
-Prometheus (spanmetrics). Logs: coletor de logs + Loki, ambos do Terraform. Segredos (PagerDuty, Discord, senha do Grafana)
+Prometheus (métricas das aplicações + spanmetrics). Logs: coletor de logs + Loki, ambos do Terraform. Segredos (PagerDuty, Discord, senha do Grafana)
 são criados pelo Terraform; aqui só existem as referências.
 
 Acesso local: `kubectl -n observability port-forward svc/grafana 3000:80` e

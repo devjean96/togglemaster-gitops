@@ -62,6 +62,11 @@ spec:
                 secretKeyRef:
                   name: auth-service-secret
                   key: MASTER_KEY
+            - name: EVALUATION_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: EVALUATION_SERVICE_API_KEY
           resources:
             requests:
               cpu: 100m
