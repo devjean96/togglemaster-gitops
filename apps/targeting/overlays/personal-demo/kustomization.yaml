@@ -13,7 +13,7 @@ labels:
     includeTemplates: true
 images:
   - name: togglemaster-targeting-service
-    newName: 000000000000.dkr.ecr.us-east-2.amazonaws.com/togglemaster-homolog/targeting-service
+    newName: 335924543883.dkr.ecr.us-east-2.amazonaws.com/togglemaster-homolog/targeting-service
     newTag: sha-268a3fbde001
 patches:
   - target:

@@ -13,7 +13,7 @@ labels:
     includeTemplates: true
 images:
   - name: togglemaster-evaluation-service
-    newName: 000000000000.dkr.ecr.us-east-2.amazonaws.com/togglemaster-homolog/evaluation-service
+    newName: 335924543883.dkr.ecr.us-east-2.amazonaws.com/togglemaster-homolog/evaluation-service
     newTag: sha-9f58c5d83c11
 patches:
   - target:
@@ -25,10 +25,10 @@ patches:
         value: homolog
       - op: replace
         path: /data/REDIS_URL
-        value: rediss://REPLACE_WITH_REDIS_ENDPOINT:6379
+        value: rediss://master.togglemaster-homolog-redis.8w8eip.use2.cache.amazonaws.com:6379
       - op: replace
         path: /data/AWS_SQS_URL
-        value: https://sqs.us-east-2.amazonaws.com/000000000000/togglemaster-homolog-evaluation-events
+        value: https://sqs.us-east-2.amazonaws.com/335924543883/togglemaster-homolog-evaluation-events
       - op: replace
         path: /data/AWS_REGION
         value: us-east-2
