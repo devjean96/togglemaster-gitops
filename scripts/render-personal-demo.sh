@@ -36,8 +36,7 @@ done
 [[ -d "$TERRAFORM_DIR" ]] || { echo "Diretorio Terraform inexistente: $TERRAFORM_DIR" >&2; exit 1; }
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-AWS_REGION_VALUE="$(aws configure get region || true)"
-AWS_REGION_VALUE="${AWS_REGION_VALUE:-${AWS_REGION:-us-east-1}}"
+AWS_REGION_VALUE="$(terraform -chdir="$TERRAFORM_DIR" output -raw aws_region)"
 SQS_URL="$(terraform -chdir="$TERRAFORM_DIR" output -raw sqs_queue_url)"
 REDIS_ENDPOINT="$(terraform -chdir="$TERRAFORM_DIR" output -raw redis_endpoint)"
 DYNAMODB_TABLE="$(terraform -chdir="$TERRAFORM_DIR" output -raw dynamodb_table_name)"
@@ -45,6 +44,7 @@ DEPLOYMENT_PROFILE="$(terraform -chdir="$TERRAFORM_DIR" output -raw deployment_p
 ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION_VALUE}.amazonaws.com"
 
 [[ "$ACCOUNT_ID" =~ ^[0-9]{12}$ ]] || { echo "Account ID AWS invalido." >&2; exit 1; }
+[[ "$AWS_REGION_VALUE" =~ ^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$ ]] || { echo "Regiao AWS do state invalida." >&2; exit 1; }
 [[ "$DEPLOYMENT_PROFILE" == "personal" ]] || { echo "O state ativo nao usa deployment_profile=personal." >&2; exit 1; }
 [[ "$SQS_URL" == https://sqs.* ]] || { echo "Output sqs_queue_url invalido." >&2; exit 1; }
 [[ -n "$REDIS_ENDPOINT" ]] || { echo "Output redis_endpoint vazio." >&2; exit 1; }

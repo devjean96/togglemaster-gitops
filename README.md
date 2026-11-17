@@ -84,7 +84,8 @@ deploy do desafio; nao existe promocao para outro ambiente.
 `homolog`, mas remove o Secret `aws-academy-credentials` dos Deployments
 evaluation e analytics. Esses Pods usam os ServiceAccounts
 `evaluation-service` e `analytics-service`, associados pelo Terraform a roles
-EKS Pod Identity.
+EKS Pod Identity. O overlay pessoal aponta ECR, SQS e os SDKs para `us-east-2`;
+o overlay `homolog` do Academy permanece em `us-east-1`.
 
 Depois de aplicar o Terraform com
 `profiles/personal-demo.tfvars`, renderize os valores da conta ativa:
