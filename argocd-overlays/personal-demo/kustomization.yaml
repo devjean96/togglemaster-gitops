@@ -9,7 +9,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/source/targetRevision
-        value: codex/aws-temporary-demo
+        value: feat/aws-temporary-demo
       - op: replace
         path: /spec/template/spec/source/path
         value: '{{.path}}/overlays/personal-demo'
@@ -19,25 +19,25 @@ patches:
     patch: |-
       - op: replace
         path: /spec/source/targetRevision
-        value: codex/aws-temporary-demo
+        value: feat/aws-temporary-demo
   - target:
       kind: Application
       name: grafana-contactpoints
     patch: |-
       - op: replace
         path: /spec/source/targetRevision
-        value: codex/aws-temporary-demo
+        value: feat/aws-temporary-demo
   - target:
       kind: Application
       name: prometheus
     patch: |-
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: codex/aws-temporary-demo
+        value: feat/aws-temporary-demo
   - target:
       kind: Application
       name: grafana
     patch: |-
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: codex/aws-temporary-demo
+        value: feat/aws-temporary-demo

@@ -96,7 +96,7 @@ Depois de aplicar o Terraform com
 
 O script consulta a identidade AWS ativa e os outputs do state para atualizar
 os registries ECR, a URL SQS, a tabela DynamoDB e o endpoint Redis. Faça commit
-e push dessas mudancas na branch `codex/aws-temporary-demo`. A root Application
+e push dessas mudancas na branch `feat/aws-temporary-demo`. A root Application
 do profile pessoal usa `argocd-overlays/personal-demo`, que fixa essa mesma
 branch e aponta o ApplicationSet para `overlays/personal-demo`.
 
