@@ -52,7 +52,7 @@ Todos os workloads sao reconciliados no namespace `togglemaster-homolog`. Os Ser
 
 Os overlays de homologacao usam os outputs provisionados pelo Terraform:
 
-- conta AWS Academy `434271199872` nos cinco repositorios ECR;
+- conta AWS Academy `483314471129` nos cinco repositorios ECR;
 - tabela DynamoDB `ToggleMasterAnalytics-homolog`;
 - Redis `master.togglemaster-homolog-redis.mjdgbj.use1.cache.amazonaws.com:6379`;
 - SQS `togglemaster-homolog-evaluation-events` em `us-east-1`.
@@ -65,7 +65,7 @@ Os nomes ECR ja correspondem ao repositorio de infraestrutura:
 ```yaml
 images:
   - name: togglemaster-auth-service
-    newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
+    newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
     newTag: sha-a1b2c3d
 ```
 

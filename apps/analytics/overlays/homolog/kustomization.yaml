@@ -13,7 +13,7 @@ labels:
     includeTemplates: true
 images:
   - name: togglemaster-analytics-service
-    newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/analytics-service
+    newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/analytics-service
     newTag: sha-281eeb5d3c05
 patches:
   - target:
@@ -28,7 +28,7 @@ patches:
         value: ToggleMasterAnalytics-homolog
       - op: replace
         path: /data/AWS_SQS_URL
-        value: https://sqs.us-east-1.amazonaws.com/434271199872/togglemaster-homolog-evaluation-events
+        value: https://sqs.us-east-1.amazonaws.com/483314471129/togglemaster-homolog-evaluation-events
   - target:
       kind: HorizontalPodAutoscaler
       name: analytics-service

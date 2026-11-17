@@ -13,7 +13,7 @@ labels:
     includeTemplates: true
 images:
   - name: togglemaster-auth-service
-    newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
+    newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/auth-service
     newTag: sha-eb924291705c
 patches:
   - target:

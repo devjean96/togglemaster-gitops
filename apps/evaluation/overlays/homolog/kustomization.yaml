@@ -13,7 +13,7 @@ labels:
     includeTemplates: true
 images:
   - name: togglemaster-evaluation-service
-    newName: 434271199872.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
+    newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
     newTag: sha-c3532a23326b
 patches:
   - target:
@@ -28,7 +28,7 @@ patches:
         value: rediss://master.togglemaster-homolog-redis.mjdgbj.use1.cache.amazonaws.com:6379
       - op: replace
         path: /data/AWS_SQS_URL
-        value: https://sqs.us-east-1.amazonaws.com/434271199872/togglemaster-homolog-evaluation-events
+        value: https://sqs.us-east-1.amazonaws.com/483314471129/togglemaster-homolog-evaluation-events
   - target:
       kind: HorizontalPodAutoscaler
       name: evaluation-service
