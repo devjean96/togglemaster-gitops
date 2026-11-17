@@ -8,13 +8,13 @@ labels:
       app.kubernetes.io/environment: homolog
     includeSelectors: true
   - pairs:
-      app.kubernetes.io/version: sha-e28c69fe558d
+      app.kubernetes.io/version: sha-11f369a2eba3
     includeSelectors: false
     includeTemplates: true
 images:
   - name: togglemaster-flag-service
     newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/flag-service
-    newTag: sha-e28c69fe558d
+    newTag: sha-11f369a2eba3
 patches:
   - target:
       kind: ConfigMap
