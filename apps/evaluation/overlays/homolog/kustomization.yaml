@@ -8,13 +8,13 @@ labels:
       app.kubernetes.io/environment: homolog
     includeSelectors: true
   - pairs:
-      app.kubernetes.io/version: sha-c3532a23326b
+      app.kubernetes.io/version: sha-a1dc176adc5a
     includeSelectors: false
     includeTemplates: true
 images:
   - name: togglemaster-evaluation-service
     newName: 483314471129.dkr.ecr.us-east-1.amazonaws.com/togglemaster-homolog/evaluation-service
-    newTag: sha-c3532a23326b
+    newTag: sha-a1dc176adc5a
 patches:
   - target:
       kind: ConfigMap
