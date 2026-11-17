@@ -13,7 +13,8 @@ togglemaster-gitops/
 │   ├── evaluation/
 │   └── analytics/
 │       ├── base/
-│       └── overlays/homolog/
+│       ├── overlays/homolog/
+│       └── overlays/personal-demo/
 ├── platform/
 │   └── ingress/
 │       ├── base/
@@ -23,6 +24,8 @@ togglemaster-gitops/
 │   ├── applications/
 │   ├── kustomization.yaml
 │   └── root-application.yaml
+├── argocd-overlays/personal-demo/
+├── scripts/render-personal-demo.sh
 └── README.md
 ```
 
@@ -43,7 +46,7 @@ As bases foram migradas dos manifests existentes em `/togglemaster/k8s` e confer
   pipeline atualiza com a tag imutavel da imagem.
 - Job `PreSync` de migration para os servicos PostgreSQL, executado antes do
   respectivo Deployment.
-- Um overlay Kustomize `homolog`, usado como ambiente unico para reduzir consumo no AWS Academy.
+- Overlays Kustomize `homolog` (Academy) e `personal-demo` (conta temporaria), ambos no mesmo namespace e com a mesma capacidade.
 - HPA para `evaluation` e `analytics`, preservado dos manifests originais.
 
 Todos os workloads sao reconciliados no namespace `togglemaster-homolog`. Os Services usam nomes estaveis, portanto a descoberta interna continua usando enderecos como `http://auth-service:8001`.
@@ -74,6 +77,28 @@ no overlay `homolog` tanto `images[].newTag` quanto
 `app.kubernetes.io/version`. Assim, o atributo OpenTelemetry `service.version`
 sempre identifica exatamente a imagem em execucao. Este e o unico destino de
 deploy do desafio; nao existe promocao para outro ambiente.
+
+## Overlay temporario da conta pessoal
+
+`overlays/personal-demo` mantem o mesmo namespace, capacidade e componentes de
+`homolog`, mas remove o Secret `aws-academy-credentials` dos Deployments
+evaluation e analytics. Esses Pods usam os ServiceAccounts
+`evaluation-service` e `analytics-service`, associados pelo Terraform a roles
+EKS Pod Identity.
+
+Depois de aplicar o Terraform com
+`profiles/personal-demo.tfvars`, renderize os valores da conta ativa:
+
+```bash
+./scripts/render-personal-demo.sh \
+  --terraform-dir ../togglemaster-infrastructure/environments/homolog
+```
+
+O script consulta a identidade AWS ativa e os outputs do state para atualizar
+os registries ECR, a URL SQS, a tabela DynamoDB e o endpoint Redis. Faça commit
+e push dessas mudancas na branch `codex/aws-temporary-demo`. A root Application
+do profile pessoal usa `argocd-overlays/personal-demo`, que fixa essa mesma
+branch e aponta o ApplicationSet para `overlays/personal-demo`.
 
 ## OpenTelemetry
 
@@ -115,7 +140,7 @@ Os Secrets devem existir no namespace do ambiente antes de os Deployments ficare
 | flag | `flag-service-secret` | `DATABASE_URL` |
 | targeting | `targeting-service-secret` | `DATABASE_URL` |
 | evaluation | `evaluation-service-secret` | `SERVICE_API_KEY` |
-| evaluation e analytics | `aws-academy-credentials` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` |
+| evaluation e analytics (somente Academy) | `aws-academy-credentials` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` |
 
 `EVALUATION_SERVICE_API_KEY` e `SERVICE_API_KEY` recebem o mesmo valor do
 Terraform. Após uma rotação, reinicie `auth-service` e `evaluation-service`
@@ -134,6 +159,9 @@ as credenciais temporarias como variaveis de ambiente do Kubernetes Secret; elas
 nao devem ser adicionadas aos manifests ou ao repositorio Git. Como as credenciais
 do AWS Academy expiram, execute novamente o pipeline depois de atualizar os
 GitHub Secrets.
+
+No overlay `personal-demo`, os SDKs usam credenciais temporarias fornecidas pelo
+EKS Pod Identity Agent. Nao existe Secret com access key no namespace.
 
 ## Migrations PostgreSQL
 
@@ -176,10 +204,13 @@ Renderize todos os overlays antes do commit:
 ```bash
 for app in auth flag targeting evaluation analytics; do
   kubectl kustomize "apps/${app}/overlays/homolog" >/dev/null
+  kubectl kustomize "apps/${app}/overlays/personal-demo" >/dev/null
 done
 
 kubectl kustomize platform/ingress/overlays/homolog >/dev/null
+kubectl kustomize platform/ingress/overlays/personal-demo >/dev/null
 kubectl kustomize argocd >/dev/null
+kubectl kustomize argocd-overlays/personal-demo >/dev/null
 ```
 
 Para uma validacao contra a API do cluster sem persistir alteracoes:
