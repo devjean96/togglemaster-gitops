@@ -39,6 +39,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: analytics-service-config
+            - secretRef:
+                name: aws-academy-credentials
           env:
             - name: DEPLOYMENT_ENVIRONMENT
               valueFrom:

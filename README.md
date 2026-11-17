@@ -115,18 +115,25 @@ Os Secrets devem existir no namespace do ambiente antes de os Deployments ficare
 | flag | `flag-service-secret` | `DATABASE_URL` |
 | targeting | `targeting-service-secret` | `DATABASE_URL` |
 | evaluation | `evaluation-service-secret` | `SERVICE_API_KEY` |
+| evaluation e analytics | `aws-academy-credentials` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` |
 
 `EVALUATION_SERVICE_API_KEY` e `SERVICE_API_KEY` recebem o mesmo valor do
 Terraform. Após uma rotação, reinicie `auth-service` e `evaluation-service`
 para que ambos recarreguem a chave e o auth execute novamente o bootstrap.
 
 `AWS_SQS_URL` pertence ao ConfigMap do analytics porque identifica uma fila e
-nao concede acesso a ela. As credenciais continuam vindo da cadeia padrao do SDK
-AWS e da LabRole dos nodes.
+nao concede acesso a ela. No ambiente AWS Academy, os pipelines de evaluation e
+analytics criam ou atualizam `aws-academy-credentials` diretamente no cluster
+com as credenciais temporarias armazenadas nos GitHub Secrets e reiniciam os
+Deployments consumidores para que os Pods recarreguem os valores.
 
 Use External Secrets Operator, Sealed Secrets ou outro mecanismo declarativo aprovado para materializar esses objetos. Nao adicione um `Secret` com valores em texto, Base64 ou credenciais temporarias do AWS Academy ao Git. Os valores encontrados nos manifests legados nao foram copiados e devem ser rotacionados se ja tiverem sido expostos ou commitados.
 
-Os SDKs AWS de `evaluation` e `analytics` usam a cadeia padrao de credenciais e, no AWS Academy, herdam as permissoes disponiveis aos nodes pela LabRole. Credenciais AWS temporarias nao sao armazenadas nos Pods.
+Os SDKs AWS continuam usando a cadeia padrao de credenciais. O `analytics` recebe
+as credenciais temporarias como variaveis de ambiente do Kubernetes Secret; elas
+nao devem ser adicionadas aos manifests ou ao repositorio Git. Como as credenciais
+do AWS Academy expiram, execute novamente o pipeline depois de atualizar os
+GitHub Secrets.
 
 ## Migrations PostgreSQL
 
